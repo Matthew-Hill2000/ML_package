@@ -1,0 +1,18 @@
+The project should have the following functionality:
+
+There should be a learning_rate, batch_size and num_epochs set
+There should then be a Network object created with a list of layers in order to make a convolutional Network
+for examples the layers could be:
+{ConvolutionalLayer(3, 6, 5), MaxPool(2), ConvolutionalLayer(6, 16, 5), MaxPool(2), Flatten(), FullyConnected(120), FullyConnected(84), FullyConnected(10)
+
+After this there should be some kind of training loop that loops over epochs.
+In each epoch there should be a single input in question to reduce the complexity for now
+The input should be given as an input to a forward method belonging to the Network
+This forward method should then iterate through the layers belogning to the Network and pass the input into their individual forward methods, producing an output that should be used as the input to the next layer 
+overal the Network forward Method returns the final output after the final Layer.
+
+There then needs to be a calculation of the cross entropy loss between the final output and the expcted output associated with the input
+there should then be a backward method associated with the Network that takes the output gradients and computes the input gradient, this start at the cross entropy loss calculation and will then go bacward through the fully connected layers, flattening, max pool layers and convolutional layers. During the backward process the gradients calculated should be used to update the parameters of the kernels and weights of each layer.
+
+There are probably more parts of this project required than i have specified. I have included most of what i have already completed for the project however there are a few problems. I want you to go through completing this project with me one small step at a time, and also use it as an oppurtunity to learn c++ better. Everytime you design a new implementation, first run by me how you intend to implement the implementation.
+
