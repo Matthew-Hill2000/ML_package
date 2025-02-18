@@ -8,15 +8,15 @@
 
 class Network {
   private:
-    std::vector<std::vector<Layer>> layers;
+    std::vector<Layer *> layers;
 
   public:
     // Default constructor
     Network() = default;
 
-    Network(std::vector<Layer> layers);
+    Network(std::vector<Layer *> layers);
     // Add a layer to the network
-    void add_layer(std::shared_ptr<Layer> layer);
+    void add_layer(Layer *layer);
 
     // Forward pass through the network
     Tensor forward(const Tensor &input);

@@ -1,10 +1,10 @@
 #include "network.h"
 #include <stdexcept>
 
-Network::Network(std::vector<Layer> layers)
+Network::Network(std::vector<Layer *> layers)
     : layers{layers} {}
 
-void Network::add_layer(Layer layer) { layers.push_back(layer); }
+void Network::add_layer(Layer *layer) { layers.push_back(layer); }
 
 Tensor Network::forward(const Tensor &input) {
   // No layers case
@@ -14,10 +14,9 @@ Tensor Network::forward(const Tensor &input) {
 
   // Pass through first layer
   Tensor current = layers[0]->forward(input);
-
   // Pass through remaining layers
-  for (size_t i = 1; i < layers.size(); ++i) {
-    current = layers[i]->forward(current);
+  for (int layer{1}; layer < layers.size(); layer++) {
+    current = layers[layer]->forward(current);
   }
 
   return current;
