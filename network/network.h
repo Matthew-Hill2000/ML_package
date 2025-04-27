@@ -2,39 +2,96 @@
 #define NETWORK_H
 
 #include "../layers/layer.h"
-#include "../tensor/tensor_new.h"
+#include "../layers/convolutional_layers/convolutional_layer.h"
+#include "../layers/flatten_layers/flatten_layer.h"
+#include "../layers/fully_connected_layers/fully_connected_layer.h"
+#include "../layers/activation_functions/relu/relu.h"
+#include "../layers/activation_functions/softmax/softmax.h"
+#include "../tensor/tensor_view.h"
+#include "../loss_functions/loss.h"
+#include "../loss_functions/cross_entropy_loss.h"
+#include <memory>
+#include <vector>
+#include <string>
 #include <memory>
 #include <vector>
 
-class Network {
-  private:
-    std::vector<Layer *> layers;
+class NetworkBuilder;
 
-  public:
-    // Default constructor
-    Network() = default;
+// The Network class represents a neural network with layers
+// Provides functionality for forward/backward passes and training
+class Network
+{
+private:
+  std::vector<Layer *> layers;    // Collection of network layers
+  friend class NetworkBuilder;    // Builder has access to private members
+  Loss *criterion = nullptr;      // Loss function used for training
+  Tensor Loss_gradients;          // Gradients from loss function
+  bool enable_parallel = false;   // Flag to enable/disable parallelization
 
-    Network(std::vector<Layer *> layers);
-    // Add a layer to the network
-    void add_layer(Layer *layer);
+public:
+  // Default constructor - creates an empty network
+  Network() = default;
 
-    // Forward pass through the network
-    Tensor forward(const Tensor &input);
+  // Constructor with an initial set of layers
+  Network(std::vector<Layer *> layers);
+  
+  // Add a single layer to the network
+  void add_layer(Layer *layer);
+  
+  // Get all layers in the network
+  std::vector<Layer *> get_layers() const;
 
-    // Backward pass through the network
-    Tensor backward(const Tensor &output_gradients);
+  // Perform forward propagation through all layers
+  Tensor forward(const Tensor &input);
 
-    // Update parameters of all layers
-    void update_parameters(double learning_rate);
+  // Perform backward propagation to calculate gradients
+  Tensor backward();
 
-    // Set training mode for all layers
-    void set_training_mode(bool mode);
+  // Update weights using computed gradients
+  void update_weights(double learning_rate);
 
-    // Get number of layers
-    size_t num_layers() const;
+  // Reset all gradients in the network to zero
+  void reset_gradients(); 
 
-    // Access a specific layer
-    std::shared_ptr<Layer> get_layer(size_t index);
+  // Enable parallelization across all layers
+  void enable_parallelization(bool enable_parallelization);
+
+  // Get summary of the network structure
+  std::string summary() const;
+
+  // Set the loss function for the network
+  void set_criterion(Loss *loss_function);
+
+  // Calculate loss and initialize gradients for backward pass
+  double calculate_loss(const Tensor &output, const Tensor &target);
+};
+
+// Builder class for constructing networks in a fluent style
+class NetworkBuilder
+{
+private:
+  std::vector<Layer *> layers;    // Temporary storage for layers
+
+public:
+  // Default constructor
+  NetworkBuilder() = default;
+
+  // Destructor to clean up unused layers
+  ~NetworkBuilder();
+
+  // Layer addition methods with fluent interface
+  NetworkBuilder &addConvLayer(const std::vector<int> &input_shape, int filters, int kernel_size);
+  NetworkBuilder &addReluLayer();
+  NetworkBuilder &addFlattenLayer(const std::vector<int> &input_shape);
+  NetworkBuilder &addFullyConnectedLayer(int input_size, int output_size);
+  NetworkBuilder &addSoftmaxLayer(const std::vector<int> &input_shape);
+
+  // Generic method to add any layer type
+  NetworkBuilder &addLayer(Layer *layer);
+
+  // Build and return the configured network
+  Network build();
 };
 
 #endif
